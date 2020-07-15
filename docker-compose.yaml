@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+    db:
+        restart: always
+        image: mongo
+        container_name: profile-repository-db
+        ports:
+            - "27017:27017"
+        volumes:
+            - ./.docker/dbdata:/data/db
+        networks:
+            - profile-repository
+    
+    profile-repository:
+        restart: always
+        container_name: profile-repository
+        ports:
+            - "3000:3000"
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        entrypoint: dockerize -template ./.env.example:.env --wait tcp://db:27017 --timeout 2m ./.docker/entrypoint.sh
+        image: aguirresabino/profile-repository-dev:latest
+        volumes:
+            - .:/usr/src/profile-repository
+            - /usr/src/profile-repository/node_modules
+        networks:
+            - profile-repository
+        tty: true
+        depends_on: 
+            - db
+
+networks:
+    profile-repository:

@@ -1,0 +1,50 @@
+name: build-pipeline
+on: 
+  push:
+    branches: [master, dev]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+    
+    steps:
+      
+      - name: Copy Repository
+        uses: actions/checkout@v2
+      
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+         
+      - name: Check Lint
+        run: yarn lint
+          
+      - name: Install Dependencies
+        run: yarn install
+
+      - name: Run Tests
+        run: yarn test
+
+      - name: Login to docker hub
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+      
+      - name: Get the image version
+        id: imageVersion
+        run: echo ::set-output name=tag::$(echo ${GITHUB_SHA})
+
+      - name: Build the tagged Docker image
+        run: docker build -t aguirresabino/profile-repository:${{steps.imageVersion.outputs.tag}} .
+
+      - name: Push the tagged Docker image
+        run: docker push aguirresabino/profile-repository:${{steps.imageVersion.outputs.tag}}
+
+      - name: Build the latest Docker image
+        run: docker build -t aguirresabino/profile-repository:latest .
+
+      - name: Push the latest Docker image
+        run: docker push aguirresabino/profile-repository:latest
+      

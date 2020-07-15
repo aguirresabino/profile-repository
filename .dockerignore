@@ -1,0 +1,13 @@
+# Node Files #
+node_modules/
+npm-debug.log
+npm-debug.log.*
+
+.git
+.github
+.vscode
+.idea
+coverage
+docker-compose.yml
+README.md
+.env.example
