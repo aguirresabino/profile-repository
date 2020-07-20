@@ -43,20 +43,16 @@ jobs:
       - name: Get the image version
         id: imageVersion
         run: echo ::set-output name=tag::$(echo ${GITHUB_SHA})
-      
-      - name: Extract branch name
-        id: extractBranch
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
 
       - name: Build the tagged Docker image
-        run: docker build -t aguirresabino/profile-repository-${{ steps.extractBranch.outputs.branch }}:${{ steps.imageVersion.outputs.tag }} .
+        run: docker build -t aguirresabino/profile-repository-${GITHUB_REF}:${{steps.imageVersion.outputs.tag}} .
 
       - name: Push the tagged Docker image
-        run: docker push aguirresabino/profile-repository-${{ steps.extractBranch.outputs.branch }}:${{ steps.imageVersion.outputs.tag }}
+        run: docker push aguirresabino/profile-repository-${GITHUB_REF}:${{steps.imageVersion.outputs.tag}}
 
       - name: Build the latest Docker image
-        run: docker build -t aguirresabino/profile-repository-${{ steps.extractBranch.outputs.branch }}:latest .
+        run: docker build -t aguirresabino/profile-repository-${GITHUB_REF}:latest .
 
       - name: Push the latest Docker image
-        run: docker push aguirresabino/profile-repository-${{ steps.extractBranch.outputs.branch }}:latest
+        run: docker push aguirresabino/profile-repository-${GITHUB_REF}:latest
       
